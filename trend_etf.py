@@ -1,4 +1,4 @@
-#ライブラリのインポート
+# ライブラリのインポート
 from pandas_datareader.stooq import StooqDailyReader
 import datetime as dt
 import bottleneck as bn
@@ -9,35 +9,36 @@ import streamlit as st
 
 # ma は moving averageの略。
 
-#株価取得範囲を設定
+# 株価取得範囲を設定
 start = dt.datetime(int(dt.datetime.now().strftime('%Y')) - 4, 1, 1)
 end = dt.datetime.now()
-#銘柄コードを入力
-#日経平均株価とTopix
-stock = ['1321.JP','1546.JP','1306.JP']
+# 銘柄コードを入力
+# 日経平均株価とTopix
+stock = ['1546.JP', '1321.JP', '1306.JP']
 
-#株価取得
+# 株価取得
 df = StooqDailyReader(stock, start=start, end=end)
 df_stock = df.read()['Close']
 
 df_stock = df_stock.fillna(method='ffill')
 for column in df_stock:
-  df_stock[df_stock[column].name + '_3days_ma'] = bn.move_mean(df_stock[column], window=3)
+    df_stock[df_stock[column].name +
+             '_3days_ma'] = bn.move_mean(df_stock[column], window=3)
 
-# print(df_stock.head(15)) 
+# print(df_stock.head(15))
 # print(df_stock.tail(15))
 
-#matplotlibで株価をグラフ化
+# matplotlibで株価をグラフ化
 fig = plt.figure()
 
 ax1 = fig.add_subplot()
 ax2 = ax1.twinx()
 ax1.plot(df_stock.index,
-        df_stock['1546.JP_3days_ma'], color="blue", label='日経225(1546.JP)')
+         df_stock['1546.JP_3days_ma'], color="blue", label='NYダウ(1546.JP)')
 ax1.plot(df_stock.index,
-        df_stock['1321.JP_3days_ma'], color="orange", label='NYダウ(1321.JP)')
+         df_stock['1321.JP_3days_ma'], color="orange", label='日経225(1321.JP)')
 ax2.plot(df_stock.index,
-        df_stock['1306.JP_3days_ma'], color="green", label='TOPIX(1306.JP)')
+         df_stock['1306.JP_3days_ma'], color="green", label='TOPIX(1306.JP)')
 locator = mdates.MonthLocator(bymonthday=15, interval=2)
 ax1.xaxis.set_major_locator(locator)
 ax1.xaxis.set_tick_params(rotation=45)
@@ -55,4 +56,4 @@ ax1.legend(h1+h2, l1+l2, loc='lower right')
 # streamlitで表示
 st.pyplot(fig)
 st.subheader('直近5日間の終値')
-st.dataframe(df_stock.loc[:,['1546.JP','1321.JP','1306.JP']].head(5))
+st.dataframe(df_stock.loc[:, ['1546.JP', '1321.JP', '1306.JP']].head(5))
